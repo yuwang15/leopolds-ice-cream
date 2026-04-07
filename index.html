@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Leopold's Ice Cream</title>
+<style>
+  @font-face { font-family: 'TikTok Sans'; src: local('TikTok Sans'); }
+  @font-face { font-family: 'TikTok Sans 18pt'; src: local('TikTok Sans 18pt'); }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    font-family: 'TikTok Sans 18pt', 'TikTok Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f0f0f0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+  }
+
+  .phone-mockup {
+    width: 390px;
+    height: 844px;
+    margin: 40px auto;
+    border-radius: 48px;
+    border: 8px solid #1a1a1a;
+    overflow: hidden;
+    position: relative;
+    background: #000;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 2px #333, inset 0 0 0 1px #444;
+  }
+  .app {
+    width: 100%;
+    height: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  /* ── Status Bar ── */
+  .status-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 27px;
+    pointer-events: none;
+  }
+  .status-bar-time {
+    font-family: 'SF Pro Text', 'SF Pro Display', -apple-system, sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.41px;
+    padding-top: 20px;
+  }
+  .status-bar-icons {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding-top: 23px;
+  }
+  .status-bar-icons img { object-fit: contain; }
+  .dynamic-island {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 122px;
+    height: 36px;
+    background: #000;
+    border-radius: 32px;
+    z-index: 210;
+  }
+  .dynamic-island-lens {
+    position: absolute;
+    right: 23px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #0e101f;
+    border: 1px solid #01031a;
+    box-shadow: inset 0 -1px 2px rgba(255,255,255,0.1), inset 0 1px 2px rgba(255,255,255,0.1);
+  }
+
+  /* ── Scrollable wrapper ── */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* ── Cover ── */
+  .cover-section { position: relative; width: 100%; aspect-ratio: 390/260; overflow: hidden; }
+  .cover-image { width: 100%; height: 120%; object-fit: cover; position: absolute; top: -10%; left: 0; }
+  .cover-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 55%; background: linear-gradient(to top, rgba(0,0,0,0.40), transparent); }
+  .cover-nav { position: absolute; top: 60px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .cover-nav .back-btn { background: none; border: none; cursor: pointer; padding: 8px; }
+  .cover-nav .back-btn svg { width: 10px; height: 17px; }
+  .cover-nav .right-actions { display: flex; gap: 20px; align-items: center; padding: 8px 0; }
+  .cover-nav .right-actions svg { width: 17px; height: 17px; }
+
+  /* ── Business Info ── */
+  .business-info { padding: 0 12px 20px; margin-top: -104px; position: relative; z-index: 2; }
+  .business-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .business-name { font-size: 18px; font-weight: 700; color: #fff; }
+  .badge { font-size: 10px; font-weight: 500; padding: 2px 4px; border-radius: 4px; display: inline-flex; align-items: center; }
+  .badge-pink { background: #fe2c55; color: #fff; }
+  .badge-gray { background: rgba(255,255,255,0.3); color: #fff; }
+  .business-detail { display: flex; align-items: center; gap: 4px; margin-top: 12px; font-size: 12px; color: #fff; }
+  .business-meta { display: flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 12px; color: #fff; }
+  .rating-stars { display: flex; gap: 2px; align-items: center; }
+  .rating-stars svg { width: 12px; height: 12px; }
+  .walking-icon { width: 15px; height: 15px; }
+
+  /* ── Friends visited ── */
+  .friends-visited { display: flex; align-items: center; gap: 4px; padding: 4px 12px; background: #f3f9fb; }
+  .friend-avatars { display: flex; }
+  .friend-avatars .avatar { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #fff; margin-left: -8px; background: #ccc; overflow: hidden; }
+  .friend-avatars .avatar:first-child { margin-left: 0; }
+  .friend-avatars .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .friends-text { font-family: 'TikTok Sans', sans-serif; font-size: 12px; color: #000; }
+
+  .separator { height: 8px; background: #f5f5f5; width: 100%; }
+
+  /* ── Action Buttons ── */
+  .action-buttons { display: flex; gap: 8px; padding: 8px 12px; overflow-x: auto; }
+  .action-buttons::-webkit-scrollbar { display: none; }
+  .action-btn { display: flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 15px; border: none; font-family: 'Inter', -apple-system, sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; height: 30px; flex-shrink: 0; }
+  .action-btn.primary { background: #000; color: #fff; }
+  .action-btn.secondary { background: #f2f2f2; color: #000; }
+  .action-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+  /* ── Tab Bar ── */
+  .tab-bar { display: flex; gap: 16px; padding: 0 24px; border-bottom: 1px solid #eee; position: sticky; top: 0; background: #fff; z-index: 50; }
+  .tab-item { font-size: 14px; font-weight: 500; color: #000; opacity: 0.58; padding: 8px 0 8px; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: opacity 0.15s; flex-shrink: 0; }
+  .tab-item.active { opacity: 1; border-bottom-color: #333; }
+
+  /* ── Tab Content ── */
+  .tab-content { display: none; padding-bottom: 80px; }
+  .tab-content.active { display: block; }
+
+  /* ========== HIGHLIGHTS ========== */
+  .highlights-content { padding: 12px; background: linear-gradient(160deg, #ffffff 0%, #f3f2ff 70%, #ece8ff 100%); }
+  .highlights-cards { display: flex; flex-direction: column; gap: 12px; }
+  .card { border-radius: 12px; overflow: hidden; }
+  .card-white { background: #fff; border: 1px solid #f0f0f0; }
+  .card-teal { background: #eef5f6; }
+  .card-inner { padding: 12px; }
+  .card-title { font-size: 16px; font-weight: 500; color: #000; margin-bottom: 12px; }
+  .card-desc { font-size: 12px; color: #303030; line-height: 1.4; margin-bottom: 12px; }
+  .card-tag { display: inline-flex; align-items: center; gap: 4px; background: #f2f2f2; border-radius: 3px; padding: 2px 4px; font-size: 10px; color: #3f3f3f; }
+  .card-images { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; padding-right: 4px; }
+  .card-images::-webkit-scrollbar { display: none; }
+  .food-image-wrap { position: relative; flex-shrink: 0; }
+  .food-image-wrap img { width: 96px; height: 96px; border-radius: 9px; object-fit: cover; display: block; }
+  .food-label { position: absolute; bottom: 4px; left: 4px; background: rgba(0,0,0,0.45); color: #fff; font-family: 'TikTok Sans', sans-serif; font-size: 10px; font-weight: 500; padding: 0 4px; border-radius: 2px; }
+  .image-counter { position: absolute; bottom: 4px; left: 4px; background: rgba(0,0,0,0.45); color: #fff; font-size: 10px; padding: 0 4px; border-radius: 2px; display: flex; align-items: center; gap: 4px; }
+  .ai-summary { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  .ai-text { font-size: 12px; color: #595959; }
+
+  /* ========== DEALS ========== */
+  .deal-offer { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: #ffe0e033; }
+  .deal-offer-left { display: flex; align-items: center; gap: 12px; }
+  .deal-offer-icon { width: 37px; height: 25px; object-fit: contain; }
+  .deal-offer-title { font-size: 12px; font-weight: 500; color: #000; }
+  .deal-offer-sub { font-family: 'TikTok Sans', sans-serif; font-size: 10px; color: #595959; }
+  .claim-btn { background: #e8e8e8; border: none; border-radius: 12px; padding: 4px 12px; font-size: 12px; font-weight: 500; color: #3a3a3a; cursor: pointer; height: 24px; }
+  .deal-brand { display: flex; align-items: center; gap: 4px; padding: 12px 16px; }
+  .deal-brand img { height: 17px; }
+  .deal-brand-name { font-family: 'TikTok Sans', sans-serif; font-size: 14px; font-weight: 500; color: #202020; }
+  .deal-item { display: flex; align-items: flex-start; padding: 12px 16px; gap: 12px; }
+  .deal-item-image { width: 84px; height: 90px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+  .deal-item-info { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .deal-item-name { font-size: 12px; font-weight: 500; color: #000; line-height: 1.4; }
+  .deal-item-meta { font-family: 'TikTok Sans', sans-serif; font-size: 10px; color: #595959; }
+  .deal-item-price { font-size: 12px; font-weight: 500; color: #000; margin-top: auto; }
+  .deal-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+  .deal-timer { display: flex; align-items: center; gap: 4px; font-family: 'Inter', sans-serif; font-size: 12px; color: #fe2c55; }
+  .deal-timer svg { width: 14px; height: 14px; }
+  .buy-btn { background: #fe2c55; border: none; border-radius: 12px; padding: 4px 20px; font-size: 12px; font-weight: 500; color: #fff; cursor: pointer; height: 24px; }
+
+  /* ========== POSTS ========== */
+  .posts-content { padding: 0 20px; }
+  .posts-section { margin-bottom: 32px; }
+  .posts-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-top: 16px; }
+  .posts-header-title { font-size: 16px; font-weight: 500; color: #000; }
+  .view-all { font-size: 12px; color: #000; opacity: 0.6; cursor: pointer; }
+  .posts-grid { display: flex; gap: 8px; overflow-x: auto; }
+  .posts-grid::-webkit-scrollbar { display: none; }
+  .post-card { width: 156px; height: 212px; border-radius: 8px; overflow: hidden; flex-shrink: 0; position: relative; background: #eee; }
+  .post-card img { width: 100%; height: 100%; object-fit: cover; }
+  .post-play-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 36px; height: 36px; background: rgba(78,78,78,0.76); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .post-play-btn svg { fill: #fff; width: 12px; height: 12px; margin-left: 2px; }
+  .post-meta-bottom { position: absolute; bottom: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .post-author { display: flex; align-items: center; gap: 4px; }
+  .post-author-avatar { width: 16px; height: 16px; border-radius: 50%; background: #888; overflow: hidden; }
+  .post-author-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .post-author-name { font-family: 'TikTok Sans', sans-serif; font-size: 8px; font-weight: 300; color: #fff; }
+  .post-likes { display: flex; align-items: center; gap: 4px; }
+  .post-likes-icon { width: 12px; height: 12px; }
+  .post-likes-count { font-family: 'TikTok Sans', sans-serif; font-size: 8px; font-weight: 500; color: #fff; }
+
+  /* ========== REVIEWS ========== */
+  .reviews-content { padding: 0 12px; }
+  .reviews-banner { width: 100%; height: 85px; object-fit: cover; border-radius: 0; margin-bottom: 16px; padding-top: 12px; }
+  .write-review-section { padding: 16px 12px 0; }
+  .write-review-text { font-family: 'TikTok Sans 18pt', sans-serif; font-size: 14px; color: #000; }
+  .write-review-text .blue { color: #3a7bd5; font-weight: 600; }
+  .write-review-stars { display: flex; gap: 8px; margin-top: 8px; margin-bottom: 8px; }
+  .write-review-stars svg { width: 26px; height: 26px; }
+  .reviews-score-row { display: flex; gap: 20px; align-items: flex-start; padding: 0 8px; }
+  .reviews-big-score { font-family: 'Inter', sans-serif; font-size: 20px; font-weight: 700; color: #000; }
+  .reviews-bars { flex: 1; display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+  .review-bar { height: 6px; background: #e8e9ed; border-radius: 6px; overflow: hidden; }
+  .review-bar-fill { height: 100%; background: #ffb700; border-radius: 6px; }
+  .reviews-count { font-family: 'Inter', sans-serif; font-size: 11px; color: #000; margin-top: 4px; }
+  .review-divider { height: 0.5px; background: rgba(97,97,97,0.25); margin: 16px 0; }
+  .filter-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 0 8px; }
+  .filter-title { font-size: 16px; font-weight: 600; color: #000; }
+  .filter-tags { display: flex; gap: 8px; overflow-x: auto; padding: 0 8px; margin-bottom: 16px; }
+  .filter-tags::-webkit-scrollbar { display: none; }
+  .filter-tag { display: flex; align-items: center; gap: 4px; padding: 2px 4px; border-radius: 2px; font-size: 12px; font-weight: 500; white-space: nowrap; cursor: pointer; flex-shrink: 0; }
+  .filter-tag.active { background: #000; color: #fff; }
+  .filter-tag.inactive { background: #ececec; color: #000; }
+  .review-item { padding: 0 8px; }
+  .review-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .review-user { display: flex; align-items: center; gap: 8px; }
+  .review-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #ddd; }
+  .review-user-name { font-family: 'TikTok Sans', sans-serif; font-size: 13px; font-weight: 500; color: #000; }
+  .review-user-meta { font-family: 'TikTok Sans', sans-serif; font-size: 11px; color: #5e5e5e; }
+  .review-rating-date { display: flex; align-items: center; gap: 4px; }
+  .review-stars-small { display: flex; gap: 1px; }
+  .review-stars-small svg { width: 10px; height: 10px; fill: #f8cc15; }
+  .review-date { font-family: 'TikTok Sans', sans-serif; font-size: 11px; color: #5e5e5e; }
+  .review-text { font-family: 'TikTok Sans', sans-serif; font-size: 12px; color: #202124; line-height: 1.4; margin-bottom: 12px; }
+  .review-photos { display: flex; gap: 8px; margin-bottom: 12px; }
+  .review-photos img { width: 104px; height: 104px; border-radius: 8px; object-fit: cover; }
+  .review-actions { display: flex; align-items: center; justify-content: flex-end; }
+  .review-action-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; color: rgba(0,0,0,0.6); }
+
+  /* ========== RECOMMENDATIONS ========== */
+  .recommendations-content { padding: 12px; }
+  .reco-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .reco-title { font-size: 16px; font-weight: 600; color: #000; }
+  .reco-list { display: flex; flex-direction: column; gap: 20px; }
+  .reco-item { display: flex; gap: 12px; }
+  .reco-item-image { width: 84px; height: 84px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+  .reco-item-info { flex: 1; min-width: 0; }
+  .reco-item-name-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .reco-item-name { font-family: 'TikTok Sans', sans-serif; font-size: 14px; font-weight: 500; color: #000; flex: 1; min-width: 0; }
+  .reco-item-distance { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .reco-item-dist, .reco-item-price { font-family: 'TikTok Sans', sans-serif; font-size: 10px; color: #000; }
+  .reco-item-rating { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #000; margin-top: 4px; }
+  .reco-item-rating svg { width: 14px; height: 14px; fill: #ffbb00; flex-shrink: 0; }
+  .reco-item-rating .rating-num { font-weight: 500; color: #000; }
+  .reco-item-rating .rating-count { color: #000; }
+  .reco-item-rating .rating-type { color: #000; }
+  .reco-tags { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+  .reco-tag { font-size: 10px; color: #545454; background: #f2f2f2; border-radius: 4px; padding: 2px 4px; }
+
+  /* ========== BOTTOM BAR ========== */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding: 12px 12px 20px;
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+    border-top: 1px solid #eee;
+  }
+  .bottom-btn {
+    flex: 1;
+    height: 37px;
+    border-radius: 17px;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .bottom-btn.share { background: #f2f2f2; color: #000; }
+  .bottom-btn.order, .bottom-btn.save, .bottom-btn.voucher { background: #fe2c55; color: #fff; }
+  .bottom-btn svg { width: 14px; height: 14px; }
+
+  /* Star SVG helper */
+  .star-svg { width: 12px; height: 12px; }
+</style>
+</head>
+<body>
+
+<div class="phone-mockup">
+<div class="app">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="status-bar-time">9:41</span>
+    <div class="status-bar-icons">
+      <img src="images/CsJ3N.png" alt="Signal" style="height:12px;">
+      <img src="images/a2UQc.png" alt="WiFi" style="height:12px;">
+      <img src="images/sCgUl.png" alt="Battery" style="height:13px;width:27px;">
+    </div>
+  </div>
+  <div class="dynamic-island">
+    <div class="dynamic-island-lens"></div>
+  </div>
+
+  <div class="scroll-content">
+    <!-- Cover -->
+    <div class="cover-section">
+      <img class="cover-image" src="images/olDPY.png" alt="Leopold's Ice Cream">
+      <div class="cover-overlay"></div>
+      <div class="cover-nav">
+        <button class="back-btn"><svg viewBox="0 0 10 17" fill="none"><path d="M8.5 1L1.5 8.5L8.5 16" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <div class="right-actions">
+          <svg viewBox="0 0 17 17" fill="none"><path d="M8.5 0L10.5 6.2H17L11.7 10L13.4 16.2L8.5 12.4L3.6 16.2L5.3 10L0 6.2H6.5L8.5 0Z" fill="white" opacity="0.6"/></svg>
+          <svg viewBox="0 0 20 5" fill="none"><circle cx="2.5" cy="2.5" r="2" fill="white"/><circle cx="10" cy="2.5" r="2" fill="white"/><circle cx="17.5" cy="2.5" r="2" fill="white"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Business Info -->
+    <div class="business-info">
+      <div class="business-name-row">
+        <span class="business-name">Leopold's Ice Cream</span>
+        <span class="badge badge-pink">300+ Favorites</span>
+        <span class="badge badge-gray">8.6k posts</span>
+      </div>
+      <div class="business-detail">
+        <span>Open now · Ice cream shop · $$ ·</span>
+        <svg class="walking-icon" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="4" r="2"/><path d="M14 7h-4l-1 4 3 3v6h2v-7l-2-2 .5-2H15l1 2h2v-2h-2l-2-2z"/></svg>
+        <span>2 min</span>
+      </div>
+      <div class="business-meta">
+        <span>(4.4)</span>
+        <div class="rating-stars">
+          <svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4" fill="#f8cc15"/></svg>
+          <svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4" fill="#f8cc15"/></svg>
+          <svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4" fill="#f8cc15"/></svg>
+          <svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4" fill="#f8cc15"/></svg>
+          <svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4" fill="#f8cc15"/></svg>
+        </div>
+        <span>(68)</span>
+      </div>
+    </div>
+
+    <!-- Friends -->
+    <div class="friends-visited">
+      <div class="friend-avatars">
+        <div class="avatar"><img src="images/ELnon.png" alt=""></div>
+        <div class="avatar"><img src="images/4wDbJ.png" alt=""></div>
+        <div class="avatar"><img src="images/EuKDr.png" alt=""></div>
+      </div>
+      <span class="friends-text">Yuwang and 3 friends visited</span>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-btn primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        Go there
+      </button>
+      <button class="action-btn secondary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+        Save
+      </button>
+      <button class="action-btn secondary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        Call
+      </button>
+      <button class="action-btn secondary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Website
+      </button>
+      <button class="action-btn secondary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        C...
+      </button>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <div class="tab-item active" data-tab="highlights">Highlights</div>
+      <div class="tab-item" data-tab="deals">Deals</div>
+      <div class="tab-item" data-tab="posts">Posts</div>
+      <div class="tab-item" data-tab="reviews">Reviews</div>
+      <div class="tab-item" data-tab="recommendations">Recommendation</div>
+    </div>
+
+    <!-- ===== HIGHLIGHTS ===== -->
+    <div class="tab-content active" id="tab-highlights">
+      <div class="highlights-content">
+        <div class="ai-summary" style="margin-bottom:12px;">
+          <img src="images/MhGgK.png" style="width:20px;height:18px;object-fit:contain;flex-shrink:0;">
+          <span class="ai-text">Ai summary from <b style="color:#000;">TikTok</b></span>
+          <div style="display:flex;align-items:center;gap:0;margin-left:4px;">
+            <div style="width:14px;height:14px;border-radius:50%;overflow:hidden;border:1px solid #fff;flex-shrink:0;"><img src="images/tLRkI.png" style="width:100%;height:100%;object-fit:cover;"></div>
+            <div style="width:14px;height:14px;border-radius:50%;overflow:hidden;border:1px solid #fff;margin-left:-5px;flex-shrink:0;"><img src="images/GDGSe.png" style="width:100%;height:100%;object-fit:cover;"></div>
+            <div style="width:14px;height:14px;border-radius:50%;background:#e5e3e3;margin-left:-5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><span style="font-size:6px;font-weight:500;color:#000;">+17</span></div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="margin-left:auto;flex-shrink:0;"><circle cx="4" cy="10" r="1.5" fill="#000"/><circle cx="10" cy="10" r="1.5" fill="#000"/><circle cx="16" cy="10" r="1.5" fill="#000"/></svg>
+        </div>
+        <div class="highlights-cards">
+          <!-- Recommended Dishes -->
+          <div class="card card-white">
+            <div class="card-inner">
+              <div class="card-title">Recommended Dishes</div>
+              <div class="card-desc">Savor <b style="color:#000;">butter ice cream, affogatos,</b> and <b style="color:#000;">brownie sundaes,</b> crafted with traditional, handcrafted flavors.</div>
+              <div class="card-tag">20% recommend <svg width="6" height="6" viewBox="0 0 6 6"><path d="M3 0L6 6H0L3 0Z" fill="#0a090b" opacity="0.44" transform="rotate(90 3 3)"/></svg></div>
+              <div class="card-images">
+                <div class="food-image-wrap"><img src="images/PhQKf.png" alt=""><span class="food-label">Butter Ice Cream</span></div>
+                <div class="food-image-wrap"><img src="images/nf3Ob.png" alt=""><span class="food-label">Affogato</span></div>
+                <div class="food-image-wrap"><img src="images/JtnPr.png" alt=""><span class="food-label">Brownie Sundae</span></div>
+                <div class="food-image-wrap"><img src="images/Y2oTk.png" alt=""></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Environment -->
+          <div class="card card-white">
+            <div class="card-inner">
+              <div class="card-title">Environment</div>
+              <div class="card-desc">Immerse in vintage charm, <b style="color:#000;">Hollywood props,</b> and live candy demos for a joyful, <b style="color:#000;">nostalgic escape.</b></div>
+              <div class="card-tag">20% recommend <svg width="6" height="6" viewBox="0 0 6 6"><path d="M3 0L6 6H0L3 0Z" fill="#0a090b" opacity="0.44" transform="rotate(90 3 3)"/></svg></div>
+              <div class="card-images">
+                <div class="food-image-wrap"><img src="images/Vl3WT.png" alt=""></div>
+                <div class="food-image-wrap"><img src="images/R3f0T.png" alt=""></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tips -->
+          <div class="card card-teal">
+            <div class="card-inner">
+              <div class="card-title">💡Tips</div>
+              <div class="card-desc" style="margin-bottom:0;">• <b style="color:#000;">Free samples?</b> Yes, please. Don't be shy! Try a few flavors before you commit.<br>• <b style="color:#000;">Open late</b> = perfect night treat. Swing by after dinner (or even as a midnight snack 🍦).<br>• <b style="color:#000;">Go classic first.</b> Their <b style="color:#000;">butter ice cream</b> is a must-try—it's what they're known for.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-summary" style="margin-top:16px;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <img src="images/E46i4.png" style="width:20px;height:20px;object-fit:contain;flex-shrink:0;">
+            <span class="ai-text">Based on 250 reviews and posts</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;color:rgba(0,0,0,0.6);font-size:12px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+            <span>2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DEALS ===== -->
+    <div class="tab-content" id="tab-deals">
+      <div class="deal-offer">
+        <div class="deal-offer-left">
+          <img class="deal-offer-icon" src="images/zAtWu.png" alt="">
+          <div style="display:flex;flex-direction:column;">
+            <span class="deal-offer-title">Get $5 Off</span>
+            <span class="deal-offer-sub">New users only</span>
+          </div>
+        </div>
+        <button class="claim-btn">Claim offer</button>
+      </div>
+      <div class="deal-brand">
+        <img src="images/jFv7o.png" alt="Leopold's">
+        <span class="deal-brand-name">Leopold's Ice Cream</span>
+      </div>
+
+      <div class="deal-item">
+        <img class="deal-item-image" src="images/5kQPP.png" alt="">
+        <div class="deal-item-info">
+          <div class="deal-item-name">Friends Combo: 4 Scoops + sharing set</div>
+          <div class="deal-item-meta">3k + views · Free cancellation</div>
+          <div class="deal-item-price" style="margin-top:24px;">$10.99</div>
+        </div>
+        <div class="deal-item-right">
+          <div class="deal-timer"><svg viewBox="0 0 24 24" fill="none" stroke="#fe2c55" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>12:00</div>
+          <button class="buy-btn">Buy</button>
+        </div>
+      </div>
+      <div class="deal-item">
+        <img class="deal-item-image" src="images/8U7JQ.png" alt="">
+        <div class="deal-item-info">
+          <div class="deal-item-name">Classic Duo: 2 Scoops (any flavor) with 1 Topping</div>
+          <div class="deal-item-meta">3k + views · Free cancellation</div>
+          <div class="deal-item-price" style="margin-top:16px;">$7.49</div>
+        </div>
+        <div class="deal-item-right">
+          <div class="deal-timer"><svg viewBox="0 0 24 24" fill="none" stroke="#fe2c55" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>12:00</div>
+          <button class="buy-btn">Buy</button>
+        </div>
+      </div>
+      <div class="deal-item">
+        <img class="deal-item-image" src="images/40vek.png" alt="">
+        <div class="deal-item-info">
+          <div class="deal-item-name">Family / Sharing Combo (3 cups)</div>
+          <div class="deal-item-meta">3k + views · Free cancellation</div>
+          <div class="deal-item-price" style="margin-top:24px;">$8.07</div>
+        </div>
+        <div class="deal-item-right" style="justify-content:flex-end;"><button class="buy-btn">Buy</button></div>
+      </div>
+      <div class="deal-item">
+        <img class="deal-item-image" src="images/Q3Eej.png" alt="">
+        <div class="deal-item-info">
+          <div class="deal-item-name">Classic Single (any flavor)</div>
+          <div class="deal-item-meta">3k + views · Free cancellation</div>
+          <div class="deal-item-price" style="margin-top:24px;">$4.49</div>
+        </div>
+        <div class="deal-item-right" style="justify-content:flex-end;"><button class="buy-btn">Buy</button></div>
+      </div>
+      <div class="deal-item">
+        <img class="deal-item-image" src="images/u2HCN.png" alt="">
+        <div class="deal-item-info">
+          <div class="deal-item-name">Classic Duo (any flavor)</div>
+          <div class="deal-item-meta">3k + views · Free cancellation</div>
+          <div class="deal-item-price" style="margin-top:24px;">$8.07</div>
+        </div>
+        <div class="deal-item-right" style="justify-content:flex-end;"><button class="buy-btn">Buy</button></div>
+      </div>
+    </div>
+
+    <!-- ===== POSTS ===== -->
+    <div class="tab-content" id="tab-posts">
+      <div class="posts-content">
+        <div class="posts-section">
+          <div class="posts-header">
+            <span class="posts-header-title">Recommended Dishes</span>
+            <span class="view-all">View all ></span>
+          </div>
+          <div class="posts-grid">
+            <div class="post-card"><img src="images/kGgO7.png" alt="">
+              <div class="post-play-btn"><svg viewBox="0 0 12 14"><polygon points="0,0 12,7 0,14"/></svg></div>
+              <div class="post-meta-bottom">
+                <div class="post-author"><div class="post-author-avatar"></div><span class="post-author-name">Greet the astronaut</span></div>
+                <div class="post-likes"><svg class="post-likes-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg><span class="post-likes-count">85</span></div>
+              </div>
+            </div>
+            <div class="post-card"><img src="images/vqe63.png" alt="">
+              <div class="post-play-btn"><svg viewBox="0 0 12 14"><polygon points="0,0 12,7 0,14"/></svg></div>
+              <div class="post-meta-bottom">
+                <div class="post-author"><div class="post-author-avatar"></div><span class="post-author-name">Rena</span></div>
+                <div class="post-likes"><svg class="post-likes-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg><span class="post-likes-count">85</span></div>
+              </div>
+            </div>
+            <div class="post-card"><img src="images/TuqrU.png" alt="">
+              <div class="post-play-btn"><svg viewBox="0 0 12 14"><polygon points="0,0 12,7 0,14"/></svg></div>
+              <div class="post-meta-bottom">
+                <div class="post-author"><div class="post-author-avatar"></div><span class="post-author-name">Greet the astronaut</span></div>
+                <div class="post-likes"><svg class="post-likes-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg><span class="post-likes-count">85</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="posts-section">
+          <div class="posts-header">
+            <span class="posts-header-title">Deals</span>
+            <span class="view-all">View all ></span>
+          </div>
+          <div class="posts-grid">
+            <div class="post-card"><img src="images/zhyTz.png" alt="">
+              <div class="post-play-btn"><svg viewBox="0 0 12 14"><polygon points="0,0 12,7 0,14"/></svg></div>
+              <div class="post-meta-bottom">
+                <div class="post-author"><div class="post-author-avatar"></div><span class="post-author-name">Greet the astronaut</span></div>
+                <div class="post-likes"><svg class="post-likes-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg><span class="post-likes-count">85</span></div>
+              </div>
+            </div>
+            <div class="post-card"><img src="images/PsbhS.png" alt="">
+              <div class="post-play-btn"><svg viewBox="0 0 12 14"><polygon points="0,0 12,7 0,14"/></svg></div>
+              <div class="post-meta-bottom">
+                <div class="post-author"><div class="post-author-avatar"></div><span class="post-author-name">Greet the astronaut</span></div>
+                <div class="post-likes"><svg class="post-likes-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg><span class="post-likes-count">85</span></div>
+              </div>
+            </div>
+            <div class="post-card"><img src="images/7kLaE.png" alt="">
+              <div class="post-play-btn"><svg viewBox="0 0 12 14"><polygon points="0,0 12,7 0,14"/></svg></div>
+              <div class="post-meta-bottom">
+                <div class="post-author"><div class="post-author-avatar"></div><span class="post-author-name">Greet the astronaut</span></div>
+                <div class="post-likes"><svg class="post-likes-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg><span class="post-likes-count">85</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== REVIEWS ===== -->
+    <div class="tab-content" id="tab-reviews">
+      <div class="reviews-content">
+        <img src="images/4HGBV.png" style="width:100%;height:auto;display:block;padding:12px 0 0;">
+        <div class="reviews-score-row" style="margin-top:16px;">
+          <div>
+            <div class="reviews-big-score">4.4</div>
+            <div class="reviews-count">(68 reviews)</div>
+          </div>
+          <div class="reviews-bars">
+            <div class="review-bar"><div class="review-bar-fill" style="width:100%"></div></div>
+            <div class="review-bar"><div class="review-bar-fill" style="width:38%"></div></div>
+            <div class="review-bar"><div class="review-bar-fill" style="width:13%"></div></div>
+            <div class="review-bar"><div class="review-bar-fill" style="width:2%"></div></div>
+            <div class="review-bar"><div class="review-bar-fill" style="width:0%"></div></div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" style="flex-shrink:0;margin-top:4px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><circle cx="12" cy="8" r="0.5" fill="#999"/></svg>
+        </div>
+        <div class="review-divider"></div>
+        <div class="filter-header">
+          <span class="filter-title">Recommended</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5e5e5e" stroke-width="2" stroke-linecap="round"><path d="M7 4v16M7 20l-3-3M7 20l3-3"/><line x1="12" y1="6" x2="20" y2="6"/><line x1="12" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/></svg>
+        </div>
+        <div class="filter-tags">
+          <div class="filter-tag active">
+            <svg width="10" height="10" viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4" fill="#fff"/></svg>
+            All ▾
+          </div>
+          <div class="filter-tag inactive">Good price (8)</div>
+          <div class="filter-tag inactive">Family Friendly (21)</div>
+          <div class="filter-tag inactive"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>Live music 209</div>
+        </div>
+        <div class="review-divider"></div>
+        <div class="review-item">
+          <div class="review-header">
+            <div class="review-user">
+              <img class="review-avatar" src="images/FxgeY.png" alt="">
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <span class="review-user-name">Hakan Akel</span>
+                <span class="review-user-meta">Local · 541 reviews</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="review-rating-date">
+                <div class="review-stars-small">
+                  <svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg>
+                  <svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg>
+                  <svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg>
+                  <svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg>
+                  <svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg>
+                </div>
+                <span class="review-date">3 days ago</span>
+              </div>
+              <svg width="18" height="4" viewBox="0 0 18 4"><circle cx="2" cy="2" r="1.5" fill="#000" opacity="0.25"/><circle cx="9" cy="2" r="1.5" fill="#000" opacity="0.25"/><circle cx="16" cy="2" r="1.5" fill="#000" opacity="0.25"/></svg>
+            </div>
+          </div>
+          <div class="review-text">Lowkey one of the best ice cream spots I've tried 😭 butter pecan is SO good. kinda busy but I'd still come back.</div>
+          <div class="review-photos">
+            <img src="images/pHzYy.png" alt="">
+            <img src="images/2OrNw.png" alt="">
+            <img src="images/zVBcp.png" alt="">
+          </div>
+          <div class="review-actions">
+            <div class="review-action-btn" style="margin-right:8px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+            </div>
+            <div class="review-action-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+              <span>2</span>
+            </div>
+          </div>
+        </div>
+        <div class="review-divider"></div>
+        <div class="review-item">
+          <div class="review-header">
+            <div class="review-user">
+              <img class="review-avatar" src="images/5XKWI.png" alt="">
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <span class="review-user-name">Hakan Akel</span>
+                <span class="review-user-meta">Local · 541 reviews</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RECOMMENDATIONS ===== -->
+    <div class="tab-content" id="tab-recommendations">
+      <div class="recommendations-content">
+        <div class="reco-header">
+          <span class="reco-title">You may also like</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"><path d="M7 4v16M7 20l-3-3M7 20l3-3"/><line x1="12" y1="6" x2="20" y2="6"/><line x1="12" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/></svg>
+        </div>
+        <div class="reco-list">
+          <div class="reco-item">
+            <img class="reco-item-image" src="images/8OMLF.png" alt="">
+            <div class="reco-item-info">
+              <div class="reco-item-name-row"><span class="reco-item-name">Cafe Lavande</span><div class="reco-item-distance"><span class="reco-item-dist">0.4 mi</span><span class="reco-item-price">$$$$</span></div></div>
+              <div class="reco-item-rating"><svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg><span class="rating-num">4.7/5</span> <span class="rating-count">(201)</span> <span class="rating-type">· Cafe</span></div>
+              <div class="reco-tags"><span class="reco-tag">Classic Southern Favorite</span><span class="reco-tag">good-price</span></div>
+            </div>
+          </div>
+          <div class="reco-item">
+            <img class="reco-item-image" src="images/YapeJ.png" alt="">
+            <div class="reco-item-info">
+              <div class="reco-item-name-row"><span class="reco-item-name">La Taraska Michoacana Paleteria Neveria</span><div class="reco-item-distance"><span class="reco-item-dist">0.4 mi</span><span class="reco-item-price">$$$$</span></div></div>
+              <div class="reco-item-rating"><svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg><span class="rating-num">4.7/5</span> <span class="rating-count">(21)</span> <span class="rating-type">· Ice Cream Shop</span></div>
+              <div class="reco-tags"><span class="reco-tag">1.3K favorites</span><span class="reco-tag">family-friendly</span></div>
+            </div>
+          </div>
+          <div class="reco-item">
+            <img class="reco-item-image" src="images/ImFR6.png" alt="">
+            <div class="reco-item-info">
+              <div class="reco-item-name-row"><span class="reco-item-name">Southern Sweets Bakery</span><div class="reco-item-distance"><span class="reco-item-dist">1.4 mi</span><span class="reco-item-price">$$$$</span></div></div>
+              <div class="reco-item-rating"><svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg><span class="rating-num">4.7/5</span> <span class="rating-count">(2k+)</span> <span class="rating-type">· Dessert Shop</span></div>
+              <div class="reco-tags"><span class="reco-tag">Bold flavors</span><span class="reco-tag">TikTok viral 🔥</span></div>
+            </div>
+          </div>
+          <div class="reco-item">
+            <img class="reco-item-image" src="images/QRPxO.png" alt="">
+            <div class="reco-item-info">
+              <div class="reco-item-name-row"><span class="reco-item-name">El Café By La Abuela</span><div class="reco-item-distance"><span class="reco-item-dist">1.8 mi</span><span class="reco-item-price">$$$$</span></div></div>
+              <div class="reco-item-rating"><svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg><span class="rating-num">4.7/5</span> <span class="rating-count">(44)</span> <span class="rating-type">· Dessert Shop</span></div>
+              <div class="reco-tags"><span class="reco-tag">1.3K favorites</span><span class="reco-tag">Been here before</span></div>
+            </div>
+          </div>
+          <div class="reco-item">
+            <img class="reco-item-image" src="images/otBxK.png" alt="">
+            <div class="reco-item-info">
+              <div class="reco-item-name-row"><span class="reco-item-name">Cold Stone Creamery</span><div class="reco-item-distance"><span class="reco-item-dist">2.4 mi</span><span class="reco-item-price">$$$$</span></div></div>
+              <div class="reco-item-rating"><svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg><span class="rating-num">4.7/5</span> <span class="rating-count">(21)</span> <span class="rating-type">· Ice Cream Shop</span></div>
+              <div class="reco-tags"><span class="reco-tag">Visited by friends</span></div>
+            </div>
+          </div>
+          <div class="reco-item">
+            <img class="reco-item-image" src="images/ITiL2.png" alt="">
+            <div class="reco-item-info">
+              <div class="reco-item-name-row"><span class="reco-item-name">TikTaco Taqueria</span><div class="reco-item-distance"><span class="reco-item-dist">2.4 mi</span><span class="reco-item-price">$$$$</span></div></div>
+              <div class="reco-item-rating"><svg viewBox="0 0 14 14"><polygon points="7,0 9.1,4.4 14,5.1 10.5,8.4 11.3,13.3 7,11 2.7,13.3 3.5,8.4 0,5.1 4.9,4.4"/></svg><span class="rating-num">4.7/5</span> <span class="rating-count">(21)</span> <span class="rating-type">· Italian Restaurant</span></div>
+              <div class="reco-tags"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar" id="bottom-bar">
+    <button class="bottom-btn share">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Share
+    </button>
+    <button class="bottom-btn order" id="btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v5h-3M6 21a2 2 0 100-4 2 2 0 000 4zM20 21a2 2 0 100-4 2 2 0 000 4z"/></svg>
+      Order online
+    </button>
+  </div>
+</div>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab-item');
+  const contents = document.querySelectorAll('.tab-content');
+  const btnPrimary = document.getElementById('btn-primary');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      document.querySelector('.scroll-content').scrollTop = 0;
+      updateBottomBar(tab.dataset.tab);
+    });
+  });
+
+  function updateBottomBar(tabId) {
+    const icons = {
+      order: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v5h-3M6 21a2 2 0 100-4 2 2 0 000 4zM20 21a2 2 0 100-4 2 2 0 000 4z"/></svg>',
+      save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>',
+      voucher: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V8H6a2 2 0 01-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 000 4h4v-4h-4z"/></svg>'
+    };
+    if (tabId === 'deals') {
+      btnPrimary.className = 'bottom-btn voucher';
+      btnPrimary.innerHTML = icons.voucher + ' Get $5 voucher';
+    } else {
+      btnPrimary.className = 'bottom-btn order';
+      btnPrimary.innerHTML = icons.order + ' Order online';
+    }
+  }
+</script>
+</body>
+</html>
