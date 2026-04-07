@@ -1,0 +1,16 @@
+{
+  "name": "Leopold's Ice Cream",
+  "short_name": "Leopold's",
+  "start_url": "/leopolds-ice-cream/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "images/image-import-14.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
