@@ -14,22 +14,19 @@
 
   html, body {
     font-family: 'TikTok Sans 18pt', 'TikTok Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #f0f0f0;
+    background: #fff;
     width: 100%;
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
   }
 
+  /* Mobile: fullscreen, no mockup */
   .phone-mockup {
-    width: 390px;
-    height: 844px;
-    margin: 40px auto;
-    border-radius: 48px;
-    border: 8px solid #1a1a1a;
-    overflow: hidden;
+    width: 100%;
+    height: 100%;
     position: relative;
-    background: #000;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 2px #333, inset 0 0 0 1px #444;
+    overflow: hidden;
+    background: #fff;
   }
   .app {
     width: 100%;
@@ -43,20 +40,51 @@
     overflow: hidden;
   }
 
-  /* ── Status Bar ── */
-  .status-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    z-index: 200;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 27px;
-    pointer-events: none;
+  /* Status bar & dynamic island: hidden on real phones (system provides its own) */
+  .status-bar, .dynamic-island { display: none; }
+
+  /* Desktop: show phone mockup */
+  @media (min-width: 500px) {
+    html, body {
+      background: #f0f0f0;
+      overflow: auto;
+    }
+    .phone-mockup {
+      width: 390px;
+      height: 844px;
+      margin: 40px auto;
+      border-radius: 48px;
+      border: 8px solid #1a1a1a;
+      background: #000;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 0 2px #333, inset 0 0 0 1px #444;
+    }
+    .status-bar {
+      display: flex;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      z-index: 200;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 27px;
+      pointer-events: none;
+    }
+    .dynamic-island {
+      display: block;
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 122px;
+      height: 36px;
+      background: #000;
+      border-radius: 32px;
+      z-index: 210;
+    }
   }
+
   .status-bar-time {
     font-family: 'SF Pro Text', 'SF Pro Display', -apple-system, sans-serif;
     font-size: 17px;
@@ -72,17 +100,6 @@
     padding-top: 23px;
   }
   .status-bar-icons img { object-fit: contain; }
-  .dynamic-island {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 122px;
-    height: 36px;
-    background: #000;
-    border-radius: 32px;
-    z-index: 210;
-  }
   .dynamic-island-lens {
     position: absolute;
     right: 23px;
@@ -110,7 +127,10 @@
   .cover-section { position: relative; width: 100%; aspect-ratio: 390/260; overflow: hidden; }
   .cover-image { width: 100%; height: 120%; object-fit: cover; position: absolute; top: -10%; left: 0; }
   .cover-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 55%; background: linear-gradient(to top, rgba(0,0,0,0.40), transparent); }
-  .cover-nav { position: absolute; top: 60px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; }
+  .cover-nav { position: absolute; top: env(safe-area-inset-top, 12px); left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; padding-top: 8px; }
+  @media (min-width: 500px) {
+    .cover-nav { top: 60px; padding-top: 0; }
+  }
   .cover-nav .back-btn { background: none; border: none; cursor: pointer; padding: 8px; }
   .cover-nav .back-btn svg { width: 10px; height: 17px; }
   .cover-nav .right-actions { display: flex; gap: 20px; align-items: center; padding: 8px 0; }
@@ -282,11 +302,14 @@
     left: 0;
     right: 0;
     background: #fff;
-    padding: 12px 12px 20px;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
     display: flex;
     gap: 12px;
     z-index: 100;
     border-top: 1px solid #eee;
+  }
+  @media (min-width: 500px) {
+    .bottom-bar { padding: 12px 12px 20px; }
   }
   .bottom-btn {
     flex: 1;
