@@ -44,7 +44,7 @@
   .status-bar, .dynamic-island { display: none; }
 
   /* Desktop: show phone mockup */
-  @media (min-width: 500px) {
+  @media (min-width: 768px) {
     html, body {
       background: #f0f0f0;
       overflow: auto;
@@ -124,11 +124,11 @@
   .scroll-content::-webkit-scrollbar { display: none; }
 
   /* ── Cover ── */
-  .cover-section { position: relative; width: 100%; aspect-ratio: 390/260; overflow: hidden; }
+  .cover-section { position: relative; width: 100%; aspect-ratio: 390/245; overflow: hidden; }
   .cover-image { width: 100%; height: 120%; object-fit: cover; position: absolute; top: -10%; left: 0; }
   .cover-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 55%; background: linear-gradient(to top, rgba(0,0,0,0.40), transparent); }
   .cover-nav { position: absolute; top: env(safe-area-inset-top, 12px); left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; padding-top: 8px; }
-  @media (min-width: 500px) {
+  @media (min-width: 768px) {
     .cover-nav { top: 60px; padding-top: 0; }
   }
   .cover-nav .back-btn { background: none; border: none; cursor: pointer; padding: 8px; }
@@ -308,7 +308,7 @@
     z-index: 100;
     border-top: 1px solid #eee;
   }
-  @media (min-width: 500px) {
+  @media (min-width: 768px) {
     .bottom-bar { padding: 12px 12px 20px; }
   }
   .bottom-btn {
