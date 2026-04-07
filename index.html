@@ -17,16 +17,16 @@
     background: #fff;
     width: 100%;
     height: 100%;
-    height: 100dvh;
     overflow: hidden;
   }
 
-  /* Mobile: fullscreen, no mockup */
+  /* Mobile: fullscreen — position:fixed fills entire screen including behind home indicator */
   .phone-mockup {
-    width: 100%;
-    height: 100%;
-    height: 100dvh;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: hidden;
     background: #fff;
   }
@@ -52,6 +52,7 @@
       overflow: auto;
     }
     .phone-mockup {
+      position: relative;
       width: 390px;
       height: 844px;
       margin: 40px auto;
